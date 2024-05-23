@@ -26,7 +26,7 @@ db.connect((err) => {
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'docs')));
 
 // Route to add a task using a POST request
 app.post('/add-task', (req, res) => {
