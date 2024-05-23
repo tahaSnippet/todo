@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    button {
+      padding: 10px;
+      font-size: 16px;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      padding: 10px;
+      background: #f4f4f4;
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    li button {
+      background: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Add Task</h1>
+  <form id="taskForm">
+    <input type="text" id="taskInput" placeholder="Enter your task" required>
+    <button type="submit">Add Task</button>
+  </form>
+
+  <h2>Task List</h2>
+  <ul id="taskList"></ul>
+
+  <script>
+    document.getElementById('taskForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const task = document.getElementById('taskInput').value;
+
+      fetch('http://localhost:3000/add-task', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ task: task })
+      })
+        .then(response => response.json())
+        .then(data => {
+          alert(data.message);
+          fetchTasks();
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    function fetchTasks() {
+      fetch('http://localhost:3000/tasks')
+        .then(response => response.json())
+        .then(tasks => {
+          const taskList = document.getElementById('taskList');
+          taskList.innerHTML = '';
+          tasks.forEach(task => {
+            const li = document.createElement('li');
+            li.textContent = task.task;
+            li.dataset.id = task.id;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function() {
+              deleteTask(task.id);
+            };
+
+            li.appendChild(deleteButton);
+            taskList.appendChild(li);
+          });
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function deleteTask(taskId) {
+      fetch(`http://localhost:3000/delete-task/${taskId}`, {
+        method: 'DELETE'
+      })
+        .then(response => response.json())
+        .then(data => {
+          alert(data.message);
+          fetchTasks();
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Fetch tasks on page load
+    window.onload = fetchTasks;
+  </script>
+</body>
+</html>
